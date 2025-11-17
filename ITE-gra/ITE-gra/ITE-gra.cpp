@@ -1,6 +1,7 @@
 ﻿#include "raylib.h"
 #include "raymath.h"
-#include <cmath>
+#include "Enemy.h"
+#include <vector>
 
 struct Ghost {
     Vector2 pos;
@@ -13,6 +14,9 @@ int main() {
     SetTargetFPS(60);
 
     Vector2 position = { 400, 300 };
+    std::vector<Enemy> enemies;
+    enemies.push_back(Enemy(Vector2{200, 200}, AttackType::CIRCLE, 1.5f, 1.0f, 3.0f, 60.0f));
+    enemies.push_back(Enemy(Vector2{500, 300}, AttackType::IN_FRONT, 5.0f, 1.0f, 3.0f, 200.0f));
 
     const float SIZE = 20.0f;
     const float DASH_DISTANCE = 250.0f;
@@ -24,21 +28,16 @@ int main() {
 
     Ghost ghosts[MAX_GHOSTS] = {};
     int ghostIndex = 0;
-
     bool dashPending = false;
     float dashTimer = 0.0f;
-
     bool dashing = false;
     float dashT = 0.0f;
-
     Vector2 dashStart = { 0,0 };
     Vector2 dashEnd = { 0,0 };
     Vector2 dashDir = { 0,0 };
     float dashAngle = 0;
-
     float shakeTime = 0.0f;
     float shakeStrength = 1.0f;
-
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
 
@@ -50,17 +49,12 @@ int main() {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !dashPending && !dashing) {
             dashPending = true;
             dashTimer = DASH_DELAY;
-
             Vector2 dir = Vector2Subtract(mouse, position);
-            if (Vector2Length(dir) > 0)
-                dashDir = Vector2Normalize(dir);
-
+            float dist = Vector2Length(dir);
+            if (dist > 0) dashDir = Vector2Normalize(dir);
+            float dashLen = dist > DASH_DISTANCE ? DASH_DISTANCE : dist;
             dashStart = position;
-            dashEnd = {
-                position.x + dashDir.x * DASH_DISTANCE,
-                position.y + dashDir.y * DASH_DISTANCE
-            };
-
+            dashEnd = { position.x + dashDir.x * dashLen, position.y + dashDir.y * dashLen };
             dashAngle = angle;
             lastGhostPos = position;
             accumulatedDistance = 0.0f;
@@ -78,25 +72,20 @@ int main() {
         if (dashing) {
             dashT += dt / DASH_TIME;
             if (dashT > 1.0f) dashT = 1.0f;
-
             Vector2 prevPos = position;
             position = Vector2Lerp(dashStart, dashEnd, dashT);
-
             accumulatedDistance += Vector2Distance(prevPos, position);
             while (accumulatedDistance >= GHOST_SPACING) {
                 Vector2 spawnPos = Vector2Lerp(lastGhostPos, position, GHOST_SPACING / accumulatedDistance);
-
                 Ghost g;
                 g.pos = spawnPos;
                 g.angle = dashAngle;
                 g.alpha = 1.0f;
                 ghosts[ghostIndex] = g;
                 ghostIndex = (ghostIndex + 1) % MAX_GHOSTS;
-
                 accumulatedDistance -= GHOST_SPACING;
                 lastGhostPos = spawnPos;
             }
-
             if (dashT >= 1.0f) {
                 dashing = false;
                 shakeTime = 0.12f;
@@ -104,10 +93,8 @@ int main() {
         }
 
         for (int i = 0; i < MAX_GHOSTS; i++) {
-            if (ghosts[i].alpha > 0.0f)
-                ghosts[i].alpha -= dt / GHOST_LIFETIME;
-            if (ghosts[i].alpha < 0.0f)
-                ghosts[i].alpha = 0.0f;
+            if (ghosts[i].alpha > 0.0f) ghosts[i].alpha -= dt / GHOST_LIFETIME;
+            if (ghosts[i].alpha < 0.0f) ghosts[i].alpha = 0.0f;
         }
 
         Vector2 shakeOffset = { 0, 0 };
@@ -117,31 +104,30 @@ int main() {
             shakeOffset.y = GetRandomValue(-shakeStrength, shakeStrength);
         }
 
+        for (auto& e : enemies) e.Update(dt, position);
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         BeginBlendMode(BLEND_ALPHA);
         for (int i = 0; i < MAX_GHOSTS; i++) {
             if (ghosts[i].alpha > 0.0f) {
-                Rectangle r = {
-                    ghosts[i].pos.x - SIZE / 2 + shakeOffset.x,
-                    ghosts[i].pos.y - SIZE / 2 + shakeOffset.y,
-                    SIZE,
-                    SIZE
-                };
+                Rectangle r = { ghosts[i].pos.x - SIZE / 2 + shakeOffset.x,
+                                ghosts[i].pos.y - SIZE / 2 + shakeOffset.y,
+                                SIZE, SIZE };
                 Color c = ColorAlpha(BLUE, ghosts[i].alpha * 0.5f);
                 DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, ghosts[i].angle, c);
             }
         }
         EndBlendMode();
 
-        Rectangle r = {
-            position.x - SIZE / 2 + shakeOffset.x,
-            position.y - SIZE / 2 + shakeOffset.y,
-            SIZE,
-            SIZE
-        };
+        for (auto& e : enemies) e.Draw();
+
+        Rectangle r = { position.x - SIZE / 2 + shakeOffset.x,
+                        position.y - SIZE / 2 + shakeOffset.y,
+                        SIZE, SIZE };
         DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
+
 
         DrawText("LPM - DASH", 10, 10, 20, DARKGRAY);
         EndDrawing();
