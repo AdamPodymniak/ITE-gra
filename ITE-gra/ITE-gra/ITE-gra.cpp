@@ -11,7 +11,9 @@ struct Ghost {
 
 int main() {
     InitWindow(800, 600, "ITE-gra");
+    InitAudioDevice();
     SetTargetFPS(60);
+    SetMasterVolume(1);
 
     Vector2 position = { 400, 300 };
     std::vector<Enemy> enemies;
@@ -41,6 +43,8 @@ int main() {
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
 
+    Sound sound = LoadSound("resources/dzwiekDashWav.wav");
+
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
@@ -58,6 +62,7 @@ int main() {
             dashAngle = angle;
             lastGhostPos = position;
             accumulatedDistance = 0.0f;
+            PlaySound(sound);
         }
 
         if (dashPending) {
@@ -133,6 +138,9 @@ int main() {
         EndDrawing();
     }
 
+    UnloadSound(sound);
+
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
