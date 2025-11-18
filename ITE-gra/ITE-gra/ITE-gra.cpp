@@ -2,12 +2,15 @@
 #include "raymath.h"
 #include "Enemy.h"
 #include <vector>
+#include <iostream>
 
 struct Ghost {
     Vector2 pos;
     float angle;
     float alpha;
 };
+
+bool Paused = false;
 
 int main() {
     InitWindow(800, 600, "ITE-gra");
@@ -43,102 +46,115 @@ int main() {
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
 
-    Sound sound = LoadSound("resources/dzwiekDashWav.wav");
+    Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav");
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
         float angle = atan2f(mouse.y - position.y, mouse.x - position.x) * RAD2DEG;
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !dashPending && !dashing) {
-            dashPending = true;
-            dashTimer = DASH_DELAY;
-            Vector2 dir = Vector2Subtract(mouse, position);
-            float dist = Vector2Length(dir);
-            if (dist > 0) dashDir = Vector2Normalize(dir);
-            float dashLen = dist > DASH_DISTANCE ? DASH_DISTANCE : dist;
-            dashStart = position;
-            dashEnd = { position.x + dashDir.x * dashLen, position.y + dashDir.y * dashLen };
-            dashAngle = angle;
-            lastGhostPos = position;
-            accumulatedDistance = 0.0f;
-            PlaySound(sound);
-        }
-
-        if (dashPending) {
-            dashTimer -= dt;
-            if (dashTimer <= 0) {
-                dashPending = false;
-                dashing = true;
-                dashT = 0.0f;
-            }
-        }
-
-        if (dashing) {
-            dashT += dt / DASH_TIME;
-            if (dashT > 1.0f) dashT = 1.0f;
-            Vector2 prevPos = position;
-            position = Vector2Lerp(dashStart, dashEnd, dashT);
-            accumulatedDistance += Vector2Distance(prevPos, position);
-            while (accumulatedDistance >= GHOST_SPACING) {
-                Vector2 spawnPos = Vector2Lerp(lastGhostPos, position, GHOST_SPACING / accumulatedDistance);
-                Ghost g;
-                g.pos = spawnPos;
-                g.angle = dashAngle;
-                g.alpha = 1.0f;
-                ghosts[ghostIndex] = g;
-                ghostIndex = (ghostIndex + 1) % MAX_GHOSTS;
-                accumulatedDistance -= GHOST_SPACING;
-                lastGhostPos = spawnPos;
-            }
-            if (dashT >= 1.0f) {
-                dashing = false;
-                shakeTime = 0.12f;
-            }
-        }
-
-        for (int i = 0; i < MAX_GHOSTS; i++) {
-            if (ghosts[i].alpha > 0.0f) ghosts[i].alpha -= dt / GHOST_LIFETIME;
-            if (ghosts[i].alpha < 0.0f) ghosts[i].alpha = 0.0f;
-        }
-
         Vector2 shakeOffset = { 0, 0 };
-        if (shakeTime > 0) {
-            shakeTime -= dt;
-            shakeOffset.x = GetRandomValue(-shakeStrength, shakeStrength);
-            shakeOffset.y = GetRandomValue(-shakeStrength, shakeStrength);
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            Paused = !Paused;
         }
 
-        for (auto& e : enemies) e.Update(dt, position);
+        if (!Paused) {
 
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !dashPending && !dashing) {
+                dashPending = true;
+                dashTimer = DASH_DELAY;
+                Vector2 dir = Vector2Subtract(mouse, position);
+                float dist = Vector2Length(dir);
+                if (dist > 0) dashDir = Vector2Normalize(dir);
+                float dashLen = dist > DASH_DISTANCE ? DASH_DISTANCE : dist;
+                dashStart = position;
+                dashEnd = { position.x + dashDir.x * dashLen, position.y + dashDir.y * dashLen };
+                dashAngle = angle;
+                lastGhostPos = position;
+                accumulatedDistance = 0.0f;
+                PlaySound(dashSound);
+            }
+
+            if (dashPending) {
+                dashTimer -= dt;
+                if (dashTimer <= 0) {
+                    dashPending = false;
+                    dashing = true;
+                    dashT = 0.0f;
+                }
+            }
+
+            if (dashing) {
+                dashT += dt / DASH_TIME;
+                if (dashT > 1.0f) dashT = 1.0f;
+                Vector2 prevPos = position;
+                position = Vector2Lerp(dashStart, dashEnd, dashT);
+                accumulatedDistance += Vector2Distance(prevPos, position);
+                while (accumulatedDistance >= GHOST_SPACING) {
+                    Vector2 spawnPos = Vector2Lerp(lastGhostPos, position, GHOST_SPACING / accumulatedDistance);
+                    Ghost g;
+                    g.pos = spawnPos;
+                    g.angle = dashAngle;
+                    g.alpha = 1.0f;
+                    ghosts[ghostIndex] = g;
+                    ghostIndex = (ghostIndex + 1) % MAX_GHOSTS;
+                    accumulatedDistance -= GHOST_SPACING;
+                    lastGhostPos = spawnPos;
+                }
+                if (dashT >= 1.0f) {
+                    dashing = false;
+                    shakeTime = 0.12f;
+                }
+            }
+
+            for (int i = 0; i < MAX_GHOSTS; i++) {
+                if (ghosts[i].alpha > 0.0f) ghosts[i].alpha -= dt / GHOST_LIFETIME;
+                if (ghosts[i].alpha < 0.0f) ghosts[i].alpha = 0.0f;
+            }
+
+
+            if (shakeTime > 0) {
+                shakeTime -= dt;
+                shakeOffset.x = GetRandomValue(-shakeStrength, shakeStrength);
+                shakeOffset.y = GetRandomValue(-shakeStrength, shakeStrength);
+            }
+
+            for (auto& e : enemies) e.Update(dt, position);
+
+        }
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        BeginBlendMode(BLEND_ALPHA);
-        for (int i = 0; i < MAX_GHOSTS; i++) {
-            if (ghosts[i].alpha > 0.0f) {
-                Rectangle r = { ghosts[i].pos.x - SIZE / 2 + shakeOffset.x,
-                                ghosts[i].pos.y - SIZE / 2 + shakeOffset.y,
-                                SIZE, SIZE };
-                Color c = ColorAlpha(BLUE, ghosts[i].alpha * 0.5f);
-                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, ghosts[i].angle, c);
+            BeginBlendMode(BLEND_ALPHA);
+            for (int i = 0; i < MAX_GHOSTS; i++) {
+                if (ghosts[i].alpha > 0.0f) {
+                    Rectangle r = { ghosts[i].pos.x - SIZE / 2 + shakeOffset.x,
+                                    ghosts[i].pos.y - SIZE / 2 + shakeOffset.y,
+                                    SIZE, SIZE };
+                    Color c = ColorAlpha(BLUE, ghosts[i].alpha * 0.5f);
+                    DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, ghosts[i].angle, c);
+                }
             }
-        }
-        EndBlendMode();
+            EndBlendMode();
 
-        for (auto& e : enemies) e.Draw();
+            for (auto& e : enemies) e.Draw();
 
-        Rectangle r = { position.x - SIZE / 2 + shakeOffset.x,
-                        position.y - SIZE / 2 + shakeOffset.y,
-                        SIZE, SIZE };
-        DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
+            Rectangle r = { position.x - SIZE / 2 + shakeOffset.x,
+                            position.y - SIZE / 2 + shakeOffset.y,
+                            SIZE, SIZE };
+            if (!Paused) {
+                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
+            }else{
+                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, 0, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
+                DrawText("Paused!", 50, 50, 50, GREEN);
+            }
 
+            DrawText("LPM - DASH", 10, 10, 20, DARKGRAY);
 
-        DrawText("LPM - DASH", 10, 10, 20, DARKGRAY);
         EndDrawing();
     }
 
-    UnloadSound(sound);
+    UnloadSound(dashSound);
 
     CloseAudioDevice();
     CloseWindow();
