@@ -1,10 +1,10 @@
 ﻿  ITE-gra.cpp
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(118,64): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(118,48): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(118,47): warning C4244: "=": konwersja z "int" do "float", możliwa utrata danych
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(119,64): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(119,48): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
-C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(119,47): warning C4244: "=": konwersja z "int" do "float", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(122,64): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(122,48): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(122,47): warning C4244: "=": konwersja z "int" do "float", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(123,64): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(123,48): warning C4244: "argument": konwersja z "float" do "int", możliwa utrata danych
+C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\ITE-gra.cpp(123,47): warning C4244: "=": konwersja z "int" do "float", możliwa utrata danych
   ITE-gra.vcxproj -> C:\Users\misie\source\repos\ITE-gra\ITE-gra\x64\Debug\ITE-gra.exe
   'pwsh.exe' is not recognized as an internal or external command,
   operable program or batch file.

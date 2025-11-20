@@ -45,6 +45,7 @@ int main() {
     float shakeStrength = 1.0f;
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
+    float anglePaused = 0.0f;
 
     Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav");
 
@@ -52,9 +53,12 @@ int main() {
         float dt = GetFrameTime();
         Vector2 mouse = GetMousePosition();
         float angle = atan2f(mouse.y - position.y, mouse.x - position.x) * RAD2DEG;
+
         Vector2 shakeOffset = { 0, 0 };
 
         if (IsKeyPressed(KEY_SPACE)) {
+            anglePaused = dashAngle;
+            std::cout << anglePaused << std::endl;
             Paused = !Paused;
         }
 
@@ -142,14 +146,17 @@ int main() {
             Rectangle r = { position.x - SIZE / 2 + shakeOffset.x,
                             position.y - SIZE / 2 + shakeOffset.y,
                             SIZE, SIZE };
+
+            DrawText("LPM - DASH", 10, 10, 20, DARKGRAY);
+
             if (!Paused) {
                 DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
             }else{
-                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, 0, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
+                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, anglePaused, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
+                DrawRectanglePro({0, 0, 800.f, 600.f}, { 0, 0 }, 0.0f, ColorAlpha(BLACK, 0.5));
                 DrawText("Paused!", 50, 50, 50, GREEN);
             }
 
-            DrawText("LPM - DASH", 10, 10, 20, DARKGRAY);
 
         EndDrawing();
     }
