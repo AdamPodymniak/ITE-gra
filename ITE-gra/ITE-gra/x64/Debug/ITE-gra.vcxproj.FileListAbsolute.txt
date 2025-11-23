@@ -1,2 +1,3 @@
 C:\Users\agpod\Documents\Programowanie\ITE-gra\ITE-gra\ITE-gra\x64\Debug\ITE-gra.vcxproj.Up2Date
 C:\Users\misie\source\repos\ITE-gra\ITE-gra\ITE-gra\x64\Debug\ITE-gra.vcxproj.Up2Date
+D:\Projekt ITE Gra\ITE-gra\ITE-gra\x64\Debug\ITE-gra.vcxproj.Up2Date

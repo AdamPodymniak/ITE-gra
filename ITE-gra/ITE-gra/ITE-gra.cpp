@@ -20,8 +20,8 @@ int main() {
 
     Vector2 position = { 400, 300 };
     std::vector<Enemy> enemies;
-    enemies.push_back(Enemy(Vector2{200, 200}, AttackType::CIRCLE, 1.5f, 1.0f, 3.0f, 60.0f));
-    enemies.push_back(Enemy(Vector2{500, 300}, AttackType::IN_FRONT, 5.0f, 1.0f, 3.0f, 200.0f));
+    enemies.push_back(Enemy(Vector2{200, 200}, AttackType::CIRCLE, 1.5f, 1.0f, 3.0f, 60.0f, 50.0f, 250.0f));
+    enemies.push_back(Enemy(Vector2{500, 300}, AttackType::IN_FRONT, 5.0f, 1.0f, 3.0f, 200.0f, 100.0f, 100.0f));
 
     const float SIZE = 20.0f;
     const float DASH_DISTANCE = 250.0f;
@@ -46,6 +46,7 @@ int main() {
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
     float anglePaused = 0.0f;
+    int playerDist = 0;
 
     Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav");
 
@@ -122,8 +123,11 @@ int main() {
                 shakeOffset.x = GetRandomValue(-shakeStrength, shakeStrength);
                 shakeOffset.y = GetRandomValue(-shakeStrength, shakeStrength);
             }
-
-            for (auto& e : enemies) e.Update(dt, position);
+           
+            for (auto& e : enemies) {
+                playerDist = sqrt(pow(position.x-e.position.x, 2) + pow(position.y-e.position.y, 2));
+                e.Update(dt, position, playerDist);
+            }
 
         }
         BeginDrawing();

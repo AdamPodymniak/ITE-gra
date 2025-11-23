@@ -30,6 +30,7 @@ public:
     float attackTimer;
     float attackCooldown;
     float attackDistance;
+    
     std::vector<float> angles;
     std::vector<EnemyRay> rays;
 
@@ -45,13 +46,16 @@ public:
     float flashTimer;
     bool flashOn;
     float lockedAngle;
+    
+    float movementSpeed;
+    float attackRange;
 
     Enemy(Vector2 pos, AttackType type, float duration,
-        float minCooldown, float maxCooldown, float distance,
-        float innerAngle = 15.0f, float outerAngle = 45.0f,
+        float minCooldown, float maxCooldown, float distance, float moveSpeed, float range,
+        float innerAngle = 15.0f, float outerAngle = 45.0f, 
         std::vector<float> ang = {});
 
-    void Update(float dt, Vector2 playerPos);
+    void Update(float dt, Vector2 playerPos, float playerDistance);
     void Draw();
 
 private:

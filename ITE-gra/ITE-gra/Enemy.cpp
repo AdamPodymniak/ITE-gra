@@ -6,13 +6,13 @@
 #define BASE_ANGULAR_SPEED 100.0f * DEG2RAD
 
 Enemy::Enemy(Vector2 pos, AttackType type, float duration,
-    float minCooldown, float maxCooldown, float distance,
+    float minCooldown, float maxCooldown, float distance, float moveSpeed, float range,
     float innerAngle, float outerAngle,
-    std::vector<float> ang)
+    std::vector<float> ang )
     : position(pos), attackType(type), attackDuration(duration),
     attacking(false), attackDistance(distance), angles(ang),
     innerAngleDeg(innerAngle), outerAngleDeg(outerAngle),
-    lockedAngle(0.0f)
+    lockedAngle(0.0f), movementSpeed(moveSpeed/60), attackRange(range)
 {
     attackCooldown = (rand() % (int)((maxCooldown - minCooldown) * 1000) + int(minCooldown * 1000)) / 1000.0f;
     attackTimer = 0.0f;
@@ -28,10 +28,11 @@ Enemy::Enemy(Vector2 pos, AttackType type, float duration,
     flashOn = true;
 }
 
-void Enemy::Update(float dt, Vector2 playerPos) {
+
+void Enemy::Update(float dt, Vector2 playerPos, float playerDist) {
     if (!attacking) {
         attackCooldown -= dt;
-        if (attackCooldown <= 0) StartAttack(playerPos);
+        if (attackCooldown <= 0 && attackRange >= playerDist) StartAttack(playerPos);
     }
     else {
         attackTimer += dt;
@@ -43,7 +44,27 @@ void Enemy::Update(float dt, Vector2 playerPos) {
         }
         if (attackTimer >= attackDuration) EndAttack();
     }
+   
+        if (attackRange < playerDist) {
+
+            if (abs(playerPos.x - position.x) >= 1.0)
+            {
+                if (position.x > playerPos.x) { position.x = position.x - (movementSpeed * 1.33); }
+                else { position.x = position.x + (movementSpeed * 1.33); }
+            }
+            if (abs(playerPos.y - position.y) >= 1.0)
+            {
+                if (position.y > playerPos.y) { position.y = position.y - movementSpeed; }
+                else { position.y = position.y + movementSpeed; }
+            }
+
+        }
+    
+
 }
+
+
+
 
 void Enemy::Draw() {
     if (attackType == AttackType::CIRCLE && attacking) {
