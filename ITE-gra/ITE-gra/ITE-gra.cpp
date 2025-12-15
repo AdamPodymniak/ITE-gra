@@ -13,12 +13,14 @@ struct Ghost {
 bool Paused = false;
 
 int main() {
-    InitWindow(800, 600, "ITE-gra");
+    int windowSizeX = 1200;
+    int windowSizeY = 820;
+    InitWindow(windowSizeX, windowSizeY, "ITE-gra");
     InitAudioDevice();
     SetTargetFPS(60);
     SetMasterVolume(1);
 
-    Vector2 position = { 400, 300 };
+    Vector2 position = { windowSizeX/2, windowSizeY/2 };
     std::vector<Enemy> enemies;
     enemies.push_back(Enemy(Vector2{200, 200}, AttackType::CIRCLE, 1.5f, 1.0f, 3.0f, 60.0f, 50.0f, 250.0f));
     enemies.push_back(Enemy(Vector2{500, 300}, AttackType::IN_FRONT, 5.0f, 1.0f, 3.0f, 200.0f, 100.0f, 100.0f));
@@ -45,7 +47,6 @@ int main() {
     float shakeStrength = 1.0f;
     float accumulatedDistance = 0.0f;
     Vector2 lastGhostPos = { 0,0 };
-    float anglePaused = 0.0f;
     int playerDist = 0;
 
     Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav");
@@ -58,8 +59,6 @@ int main() {
         Vector2 shakeOffset = { 0, 0 };
 
         if (IsKeyPressed(KEY_SPACE)) {
-            anglePaused = dashAngle;
-            std::cout << anglePaused << std::endl;
             Paused = !Paused;
         }
 
@@ -156,8 +155,8 @@ int main() {
             if (!Paused) {
                 DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
             }else{
-                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, anglePaused, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
-                DrawRectanglePro({0, 0, 800.f, 600.f}, { 0, 0 }, 0.0f, ColorAlpha(BLACK, 0.5));
+                DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, dashAngle, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
+                DrawRectanglePro({0, 0, (float)windowSizeX, (float)windowSizeY}, { 0, 0 }, 0.0f, ColorAlpha(BLACK, 0.5));
                 DrawText("Paused!", 50, 50, 50, GREEN);
             }
 
