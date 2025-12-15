@@ -10,12 +10,14 @@ struct Ghost {
     float alpha;
 };
 
-bool Paused = false;
+bool Paused = true;
+bool isInMenu = true;
 
 int main() {
     int windowSizeX = 1200;
     int windowSizeY = 820;
-    InitWindow(windowSizeX, windowSizeY, "ITE-gra");
+    char gameName[8] = "ITE-gra";
+    InitWindow(windowSizeX, windowSizeY, gameName);
     InitAudioDevice();
     SetTargetFPS(60);
     SetMasterVolume(1);
@@ -49,7 +51,11 @@ int main() {
     Vector2 lastGhostPos = { 0,0 };
     int playerDist = 0;
 
-    Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav");
+    Sound dashSound = LoadSound("resources/sound/dzwiekDashWav.wav"); // Załadowanie dźwięku poruszania się gracza
+    Texture2D startButton = LoadTexture("resources/textures/startButton.png"); // Załadowanie przycisku w menu
+
+    Rectangle startButtonRec = { 0, 0, (float)startButton.width, (float)startButton.height };
+    Rectangle startButtonBounds = { (windowSizeX - startButton.width) / 2.0f, (windowSizeY - startButton.height) / 2.0f, startButton.width, startButton.height };
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -61,7 +67,10 @@ int main() {
         if (IsKeyPressed(KEY_SPACE)) {
             Paused = !Paused;
         }
-
+        if (CheckCollisionPointRec(mouse, startButtonBounds) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            isInMenu = false;
+            Paused = false;
+        }
         if (!Paused) {
 
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !dashPending && !dashing) {
@@ -131,7 +140,11 @@ int main() {
         }
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
+        if (isInMenu) {
+            DrawText(gameName, (windowSizeX-MeasureText(gameName, 50))/2, 50, 50, BLACK); // Wypisanie w centrum tytułu gry.
+            DrawTextureRec(startButton, startButtonRec, {startButtonBounds.x, startButtonBounds.y}, WHITE);
+        }
+        else {
             BeginBlendMode(BLEND_ALPHA);
             for (int i = 0; i < MAX_GHOSTS; i++) {
                 if (ghosts[i].alpha > 0.0f) {
@@ -154,11 +167,14 @@ int main() {
 
             if (!Paused) {
                 DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, angle, BLUE);
-            }else{
+            }
+            else {
                 DrawRectanglePro(r, { SIZE / 2, SIZE / 2 }, dashAngle, BLUE); // Ma zapamiętywać w jakim punkcie była myszka w momencie naciśnięcia pauzy.
-                DrawRectanglePro({0, 0, (float)windowSizeX, (float)windowSizeY}, { 0, 0 }, 0.0f, ColorAlpha(BLACK, 0.5));
+                DrawRectanglePro({ 0, 0, (float)windowSizeX, (float)windowSizeY }, { 0, 0 }, 0.0f, ColorAlpha(BLACK, 0.5));
                 DrawText("Paused!", 50, 50, 50, GREEN);
             }
+        }
+
 
 
         EndDrawing();
